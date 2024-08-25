@@ -1,6 +1,7 @@
 [package]
 authors = ["vyfor"]
 name = "kotlin"
+license = "Apache-2.0"
 description = "Kotlin Language"
 version = "0.0.1"
 edition = "2021"
