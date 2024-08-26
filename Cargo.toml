@@ -1,9 +1,16 @@
 [package]
 authors = ["vyfor"]
-name = "kotlin"
-license = "Apache-2.0"
-description = "Kotlin Language"
-version = "0.0.1"
+categories = ["compilers", "development-tools", "parser-implementations"]
+description = "Kotlin Language Parser (WIP)"
 edition = "2021"
+keywords = ["kotlin", "language", "parser", "syntax", "ast"]
+license = "MIT"
+name = "kotlin"
+repository = "https://github.com/vyfor/kotlin-parser"
+version = "0.0.2"
+
+[lib]
+crate-type = ["lib"]
 
 [dependencies]
+chumsky = "0.9.3"
