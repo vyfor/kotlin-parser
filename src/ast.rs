@@ -1,23 +1,44 @@
 #[derive(Debug, PartialEq, Clone)]
 pub enum Stmt {
-    VarDecl {
+    Declaration(DeclarationKind),
+    Conditional(ConditionalKind),
+    Repeat(RepeatKind),
+    ExprStmt(Box<Expr>),
+    Scope(Block),
+
+    Return(Option<Box<Expr>>),
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum DeclarationKind {
+    Property {
+        visibility: Option<VisibilityModifier>,
+        inheritance: Option<InheritanceModifier>,
         mutable: bool,
         name: String,
         ty: Option<Type>,
         init: Option<Box<Expr>>,
     },
-    FunDecl {
+    Function {
+        visibility: Option<VisibilityModifier>,
+        inheritance: Option<InheritanceModifier>,
         name: String,
         params: Vec<(String, Type)>,
         ty: Option<Type>,
         body: Block,
     },
-    ExprStmt(Box<Expr>),
+}
 
+#[derive(Debug, PartialEq, Clone)]
+pub enum ConditionalKind {
     If {
         branches: Vec<(Expr, Block)>,
         otherwise: Option<Block>,
     },
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum RepeatKind {
     While {
         condition: Box<Expr>,
         body: Block,
@@ -27,7 +48,21 @@ pub enum Stmt {
         condition: Box<Expr>,
         body: Block,
     },
-    Return(Option<Box<Expr>>),
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum VisibilityModifier {
+    Public,
+    Internal,
+    Protected,
+    Private,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum InheritanceModifier {
+    Open,
+    Final,
+    Abstract,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -129,10 +164,6 @@ pub enum BinaryOperator {
     GreaterThanOrEqual,
     And,
     Or,
-    Xor,
-    Shl,
-    Shr,
-    UShr,
     In,
     NotIn,
     Is,
@@ -144,6 +175,9 @@ pub enum BinaryOperator {
     Multiply,
     Divide,
     Modulo,
+    As,
+    AsNullable,
+    Elvis,
 }
 
 #[derive(Debug, PartialEq, Clone)]

@@ -1,4 +1,4 @@
-mod expressions;
-mod literals;
-pub mod statements;
-mod types;
+mod expression;
+mod literal;
+pub mod statement;
+mod ty;
