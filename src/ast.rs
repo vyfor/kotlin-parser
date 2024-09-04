@@ -28,11 +28,11 @@ pub enum Statement {
 #[derive(Debug, PartialEq, Clone)]
 pub struct Declaration {
     pub annotations: Vec<AnnotationSet>,
-    pub ty: DeclarationType,
+    pub kind: DeclarationKind,
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum DeclarationType {
+pub enum DeclarationKind {
     Constructor(ConstructorDeclaration),
     Entity(EntityDeclaration),
     EnumEntry(EnumEntryDeclaration),
@@ -80,12 +80,12 @@ pub struct ConstructorDeclaration {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ConstructorDelegate {
-    pub ty: ConstructorDelegateType,
+    pub kind: ConstructorDelegateKind,
     pub args: Vec<CallArg>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum ConstructorDelegateType {
+pub enum ConstructorDelegateKind {
     This,
     Super,
 }
@@ -97,7 +97,7 @@ pub struct FunctionDeclaration {
     pub receiver: Option<Type>,
     pub name: Option<String>,
     pub params: Vec<Param>,
-    pub ty: Option<Type>,
+    pub return_ty: Option<Type>,
     pub bounds: Vec<TypeBound>,
     pub body: Option<Block>,
 }
@@ -124,15 +124,25 @@ pub struct PropertyDeclaration {
 #[derive(Debug, PartialEq, Clone)]
 pub enum PropertyAccessor {
     Getter {
+        annotations: Vec<AnnotationSet>,
         modifiers: Vec<Modifier>,
-        ty: Option<Type>,
+        return_ty: Option<Type>,
         body: Option<Block>,
     },
     Setter {
+        annotations: Vec<AnnotationSet>,
         modifiers: Vec<Modifier>,
-        field: Option<String>,
+        field: PropertySetterField,
         body: Option<Block>,
     },
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct PropertySetterField {
+    pub name: String,
+    pub ty: Option<Type>,
+    pub return_ty: Option<Type>,
+    pub body: Option<Block>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -154,7 +164,6 @@ pub struct EnumEntryDeclaration {
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expression {
     Literal(Literal),
-    Annotated(AnnotatedExpression),
     ArrayAccess(ArrayAccessExpression),
     BinaryOp(BinaryOperation),
     Break(BreakExpression),
@@ -315,6 +324,7 @@ pub struct WhenEntry {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ObjectExpression {
+    pub annotations: Vec<AnnotationSet>,
     pub extends: Vec<EntityDeclaration>,
     pub inner: Vec<Declaration>,
 }
@@ -354,12 +364,6 @@ pub struct ReferenceExpression {
 pub struct LabeledExpression {
     pub label: String,
     pub expr: Box<Expression>,
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct AnnotatedExpression {
-    pub expr: Box<Expression>,
-    pub anns: Vec<AnnotationSet>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -412,7 +416,7 @@ pub struct SimpleType {
 pub struct FunctionType {
     pub receiver: Option<Type>,
     pub params: Vec<AnonymousParam>,
-    pub ty: Type,
+    pub return_ty: Type,
     pub is_nullable: bool,
 }
 
