@@ -165,6 +165,7 @@ pub enum Expression {
     Lambda(LambdaBlock),
     Labeled(LabeledExpression),
     Object(ObjectExpression),
+    Parenthesized(ParenthesizedExpression),
     PropertyReference(PropertyReferenceExpression),
     Reference(ReferenceExpression),
     Return(ReturnExpression),
@@ -316,6 +317,11 @@ pub struct WhenEntry {
 pub struct ObjectExpression {
     pub extends: Vec<EntityDeclaration>,
     pub inner: Vec<Declaration>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct ParenthesizedExpression {
+    pub expr: Box<Expression>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
