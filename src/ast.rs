@@ -357,7 +357,7 @@ pub struct BreakExpression {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ReferenceExpression {
-    pub parts: Vec<String>,
+    pub path: Vec<String>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -461,7 +461,7 @@ pub struct AnnotationSet {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Annotation {
-    pub parts: Vec<String>,
+    pub path: Vec<String>,
     pub args: Vec<CallArg>,
 }
 
