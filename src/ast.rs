@@ -8,13 +8,12 @@ pub struct KotlinFile {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Package {
-    pub modifiers: Vec<Modifier>,
-    pub names: Vec<String>,
+    pub path: Path,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Import {
-    pub names: Vec<String>,
+    pub path: Path,
     pub is_wildcard: bool,
     pub alias: Option<String>,
 }
@@ -47,7 +46,7 @@ pub struct EntityDeclaration {
     pub modifiers: Vec<Modifier>,
     pub kind: EntityDeclarationKind,
     pub name: String,
-    pub type_params: Vec<TypeParam>,
+    pub type_params: Vec<BoundedTypeParam>,
     pub primary_constructor: Option<PrimaryConstructorDeclaration>,
     pub constructors: Vec<ConstructorDeclaration>,
     pub bounds: Vec<TypeBound>,
@@ -114,7 +113,7 @@ pub struct PropertyDeclaration {
     pub is_mutable: bool,
     pub is_delegated: bool,
     pub type_params: Vec<TypeParam>,
-    pub vars: Tuple,
+    pub vars: Vars,
     pub receiver: Option<Type>,
     pub bounds: Vec<TypeBound>,
     pub init: Option<Expression>,
@@ -202,21 +201,21 @@ pub enum Literal {
 #[derive(Debug, PartialEq, Clone)]
 pub struct IfExpression {
     pub expr: Box<Expression>,
-    pub then: Box<Expression>,
+    pub then: Block,
     pub otherwise: Option<Box<Expression>>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ForExpression {
-    pub vars: Tuple,
+    pub vars: Vars,
     pub iterable: Box<Expression>,
-    pub body: Box<Expression>,
+    pub body: Block,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct WhileExpression {
     pub expr: Box<Expression>,
-    pub body: Box<Expression>,
+    pub body: Block,
     pub is_do_while: bool,
 }
 
@@ -319,7 +318,7 @@ pub struct WhenExpression {
 #[derive(Debug, PartialEq, Clone)]
 pub struct WhenEntry {
     pub exprs: Vec<Expression>,
-    pub body: Box<Expression>,
+    pub body: Block,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -357,7 +356,7 @@ pub struct BreakExpression {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ReferenceExpression {
-    pub path: Vec<String>,
+    pub path: Path,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -368,23 +367,22 @@ pub struct LabeledExpression {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct CallExpression {
-    pub expr: Box<Expression>,
+    pub path: Path,
     pub args: Vec<CallArg>,
     pub type_args: Vec<Type>,
-    pub lambda: Option<Box<Expression>>,
+    pub lambda: Option<Box<LambdaBlock>>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct LambdaBlock {
     pub label: Option<String>,
-    pub vars: Tuple,
+    pub vars: Option<Vars>,
     pub body: Option<Block>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ArrayAccessExpression {
     pub expr: Box<Expression>,
-    pub index: Vec<Expression>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -407,7 +405,7 @@ pub enum Type {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct SimpleType {
-    pub name: Option<String>,
+    pub name: String,
     pub type_args: Vec<Type>,
     pub is_nullable: bool,
 }
@@ -437,20 +435,26 @@ pub struct Param {
 pub struct TypeParam {
     pub annotations: Vec<AnnotationSet>,
     pub name: String,
+    pub ty: Option<Type>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct BoundedTypeParam {
+    pub annotations: Vec<AnnotationSet>,
     pub bounds: Vec<TypeBound>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct TypeBound {
-    pub ty: Type,
-    pub kind: BoundKind,
+    pub name: String,
+    pub ty: Option<Type>,
+    pub kind: Option<BoundKind>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum BoundKind {
-    Unconstrained,
-    Covariant,
-    Contravariant,
+    In,
+    Out,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -461,8 +465,8 @@ pub struct AnnotationSet {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Annotation {
-    pub path: Vec<String>,
-    pub args: Vec<CallArg>,
+    pub path: Path,
+    pub args: Vec<InvocationArg>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -473,13 +477,19 @@ pub struct CallArg {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Tuple {
-    pub is_destructured: bool,
-    pub vars: Vec<VarDefinition>,
+pub struct InvocationArg {
+    pub name: Option<String>,
+    pub value: Box<Expression>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct VarDefinition {
+pub struct Vars {
+    pub is_destructured: bool,
+    pub vars: Vec<Var>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct Var {
     pub name: String,
     pub ty: Option<Type>,
 }
@@ -495,6 +505,8 @@ pub enum AnnotationSite {
     SetParam,
     Delegate,
 }
+
+pub type Path = Vec<String>;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Modifier {
