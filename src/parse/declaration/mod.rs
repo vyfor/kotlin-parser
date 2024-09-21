@@ -1,12 +1,14 @@
 pub mod annotation;
 pub mod enum_entry;
 pub mod function;
+pub mod init;
 
 use crate::ast::*;
 use annotation::annotations_parser;
 use chumsky::prelude::*;
 use enum_entry::enum_entry_parser;
 use function::function_parser;
+use init::init_block_parser;
 
 pub fn declaration_parser<'a>(
     stmt_parser: impl Parser<char, Statement, Error = Simple<char>> + Clone + 'a,
@@ -20,6 +22,8 @@ pub fn declaration_parser<'a>(
                 function_parser(stmt_parser.clone())
                     .map(DeclarationKind::Function),
                 enum_entry_parser(decl.clone()).map(DeclarationKind::EnumEntry),
+                init_block_parser(stmt_parser.clone())
+                    .map(DeclarationKind::InitBlock),
             )))
             .map(|(annotations, kind)| Declaration {
                 annotations: annotations.unwrap_or_default(),
