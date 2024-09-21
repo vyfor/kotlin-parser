@@ -174,7 +174,7 @@ pub enum Expression {
     Labeled(LabeledExpression),
     Object(ObjectExpression),
     Parenthesized(ParenthesizedExpression),
-    PropertyReference(PropertyReferenceExpression),
+    MemberReference(MemberReferenceExpression),
     Reference(ReferenceExpression),
     Return(ReturnExpression),
     StringTemplate(StringTemplateExpression),
@@ -386,7 +386,7 @@ pub struct BracketExpression {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct PropertyReferenceExpression {
+pub struct MemberReferenceExpression {
     pub lhs: Option<Box<Expression>>,
     pub rhs: Box<Expression>,
 }
