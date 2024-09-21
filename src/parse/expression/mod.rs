@@ -28,7 +28,7 @@ pub fn expression_parser() -> impl Parser<char, Expression, Error = Simple<char>
             try_expr::try_expr_parser(stmt_parser.clone()),
             when_expr::when_expr_parser(stmt_parser.clone(), expr.clone()),
             while_expr::while_expr_parser(stmt_parser.clone(), expr.clone()),
-            array_access::array_access_parser(),
+            array_access::bracket_expr_parser(),
             call::call_parser(stmt_parser.clone(), expr.clone()),
         ))
         .padded()

@@ -163,7 +163,7 @@ pub struct EnumEntryDeclaration {
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expression {
     Literal(Literal),
-    ArrayAccess(ArrayAccessExpression),
+    Bracket(BracketExpression),
     BinaryOp(BinaryOperation),
     Break(BreakExpression),
     Call(CallExpression),
@@ -381,7 +381,7 @@ pub struct LambdaBlock {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct ArrayAccessExpression {
+pub struct BracketExpression {
     pub expr: Box<Expression>,
 }
 
