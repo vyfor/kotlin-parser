@@ -1,4 +1,5 @@
 pub mod annotation;
+pub mod constructor;
 pub mod entity;
 pub mod enum_entry;
 pub mod function;
@@ -7,6 +8,7 @@ pub mod init;
 use crate::ast::*;
 use annotation::annotations_parser;
 use chumsky::prelude::*;
+use constructor::constructor_parser;
 use entity::entity_parser;
 use enum_entry::enum_entry_parser;
 use function::function_parser;
@@ -31,6 +33,8 @@ pub fn declaration_parser<'a>(
                     .map(DeclarationKind::InitBlock),
                 entity_parser(stmt_parser.clone(), expr_parser.clone())
                     .map(DeclarationKind::Entity),
+                constructor_parser(stmt_parser.clone(), expr_parser.clone())
+                    .map(DeclarationKind::Constructor),
             )))
             .map(|(annotations, kind)| Declaration {
                 annotations: annotations.unwrap_or_default(),

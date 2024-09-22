@@ -60,7 +60,6 @@ pub enum EntityDeclarationKind {
     Object,
     CompanionObject,
     Enum,
-    SecondaryConstructor(ConstructorDeclaration),
 }
 
 #[derive(Debug, PartialEq, Clone)]
