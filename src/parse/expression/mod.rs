@@ -1,66 +1,38 @@
-use crate::ast::*;
-use binary_op::binary_op_parser;
-use call::call_expr_parser;
+use crate::ast::{Expression, Statement};
 use chumsky::prelude::*;
+use object_expr::object_expr_parser;
 
-mod binary_op;
-mod call;
-mod unary;
-mod variable;
+pub mod array_access;
+pub mod break_expr;
+pub mod call;
+pub mod continue_expr;
+pub mod for_expr;
+pub mod if_expr;
+pub mod label;
+pub mod literal;
+pub mod object_expr;
+pub mod path;
+pub mod try_expr;
+pub mod when_expr;
+pub mod while_expr;
 
-pub fn expr_parser() -> impl Parser<char, Expr, Error = Simple<char>> {
+pub fn expression_parser<'a>(
+    stmt_parser: impl Parser<char, Statement, Error = Simple<char>> + Clone + 'a,
+) -> impl Parser<char, Expression, Error = Simple<char>> + 'a {
     recursive(|expr| {
-        choice((call_expr_parser(expr.clone()), binary_op_parser(expr)))
-            .padded()
+        choice((
+            break_expr::break_expr_parser(),
+            continue_expr::continue_expr_parser(),
+            for_expr::for_expr_parser(stmt_parser.clone(), expr.clone()),
+            if_expr::if_expr_parser(stmt_parser.clone(), expr.clone()),
+            try_expr::try_expr_parser(stmt_parser.clone(), expr.clone()),
+            when_expr::when_expr_parser(stmt_parser.clone(), expr.clone()),
+            while_expr::while_expr_parser(stmt_parser.clone(), expr.clone()),
+            array_access::bracket_expr_parser(stmt_parser.clone()),
+            call::call_parser(stmt_parser.clone(), expr.clone()),
+            object_expr_parser(stmt_parser.clone(), expr.clone()),
+        ))
+        .padded()
+        .map(Expression::from)
     })
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn parse_binary_expr() {
-        println!("{:#?}", expr_parser().parse("1 + 2 * 3").unwrap());
-
-        // assert_eq!(
-        //     expr_parser().parse("1 + 2 - 3"),
-        //     Ok(Expr::BinaryOp(
-        //         Box::new(Expr::Literal(Literal::Integer(1))),
-        //         BinaryOperator::Add,
-        //         Box::new(Expr::BinaryOp(
-        //             Box::new(Expr::Literal(Literal::Integer(2))),
-        //             BinaryOperator::Subtract,
-        //             Box::new(Expr::Literal(Literal::Integer(3)))
-        //         ))
-        //     ))
-        // );
-    }
-
-    #[test]
-    fn parse_function_call() {
-        assert_eq!(
-            expr_parser().parse("mapOf<String, Int?>(a, b, c)"),
-            Ok(Expr::Call(
-                "mapOf".to_string(),
-                vec![
-                    Type {
-                        kind: TypeKind::String,
-                        nullable: false,
-                        attributes: vec![],
-                    },
-                    Type {
-                        kind: TypeKind::Int,
-                        nullable: true,
-                        attributes: vec![],
-                    }
-                ],
-                vec![
-                    Expr::Variable("a".to_string()),
-                    Expr::Variable("b".to_string()),
-                    Expr::Variable("c".to_string())
-                ]
-            ))
-        )
-    }
 }

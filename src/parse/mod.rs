@@ -1,4 +1,4 @@
-mod expression;
-mod literal;
+pub mod declaration;
+pub mod expression;
 pub mod statement;
-mod ty;
+pub mod ty;
