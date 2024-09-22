@@ -4,6 +4,7 @@ pub mod entity;
 pub mod enum_entry;
 pub mod function;
 pub mod init;
+pub mod typealias;
 
 use crate::ast::*;
 use annotation::annotations_parser;
