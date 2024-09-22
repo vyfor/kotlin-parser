@@ -28,26 +28,28 @@ pub fn call_parser(
         })
 }
 
-pub fn call_args_parser(
+pub fn call_arg_parser(
     expr_parser: impl Parser<char, Expression, Error = Simple<char>>,
-) -> impl Parser<char, Vec<CallArg>, Error = Simple<char>> {
+) -> impl Parser<char, CallArg, Error = Simple<char>> {
     text::ident()
         .padded()
         .then_ignore(just('='))
         .or_not()
         .then(just('*').or_not())
         .then(expr_parser)
+        .map(|((name, is_spread), expr)| CallArg {
+            name,
+            value: Box::new(expr),
+            is_spread: is_spread.is_some(),
+        })
+}
+
+pub fn call_args_parser(
+    expr_parser: impl Parser<char, Expression, Error = Simple<char>>,
+) -> impl Parser<char, Vec<CallArg>, Error = Simple<char>> {
+    call_arg_parser(expr_parser)
         .separated_by(just(',').padded())
         .delimited_by(just('(').padded(), just(')').padded())
-        .map(|args| {
-            args.into_iter()
-                .map(|((name, is_spread), expr)| CallArg {
-                    name,
-                    value: Box::new(expr),
-                    is_spread: is_spread.is_some(),
-                })
-                .collect()
-        })
 }
 
 pub fn invocation_args_parser(
@@ -77,9 +79,7 @@ pub fn lambda_parser(
         .or_not()
         .then(
             just('{')
-                .ignore_then(
-                    vars_parser().then_ignore(just("->")).or_not(),
-                )
+                .ignore_then(vars_parser().then_ignore(just("->")).or_not())
                 .then(inner_block_parser(stmt_parser).or_not())
                 .then_ignore(just('}')),
         )

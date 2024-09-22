@@ -1,4 +1,5 @@
 pub mod annotation;
+pub mod entity;
 pub mod enum_entry;
 pub mod function;
 pub mod init;
@@ -6,14 +7,17 @@ pub mod init;
 use crate::ast::*;
 use annotation::annotations_parser;
 use chumsky::prelude::*;
+use entity::entity_parser;
 use enum_entry::enum_entry_parser;
 use function::function_parser;
 use init::init_block_parser;
 
+use super::expression::expression_parser;
+
 pub fn declaration_parser<'a>(
     stmt_parser: impl Parser<char, Statement, Error = Simple<char>> + Clone + 'a,
 ) -> impl Parser<char, Declaration, Error = Simple<char>> + 'a {
-    let stmt_parser = stmt_parser.clone();
+    let expr_parser = expression_parser().boxed();
     recursive(|decl| {
         annotations_parser()
             .repeated()
@@ -24,6 +28,8 @@ pub fn declaration_parser<'a>(
                 enum_entry_parser(decl.clone()).map(DeclarationKind::EnumEntry),
                 init_block_parser(stmt_parser.clone())
                     .map(DeclarationKind::InitBlock),
+                entity_parser(stmt_parser.clone(), expr_parser.clone())
+                    .map(DeclarationKind::Entity),
             )))
             .map(|(annotations, kind)| Declaration {
                 annotations: annotations.unwrap_or_default(),
@@ -65,4 +71,5 @@ pub fn modifier_parser() -> impl Parser<char, Modifier, Error = Simple<char>> {
         just("actual").to(Modifier::Actual),
         just("expect").to(Modifier::Expect),
     )))
+    .padded()
 }

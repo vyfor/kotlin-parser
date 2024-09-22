@@ -45,12 +45,12 @@ pub enum DeclarationKind {
 pub struct EntityDeclaration {
     pub modifiers: Vec<Modifier>,
     pub kind: EntityDeclarationKind,
-    pub name: String,
+    pub name: Option<String>,
     pub type_params: Vec<BoundedTypeParam>,
     pub primary_constructor: Option<PrimaryConstructorDeclaration>,
-    pub constructors: Vec<ConstructorDeclaration>,
+    pub extends: Vec<Type>,
     pub bounds: Vec<TypeBound>,
-    pub inner: Vec<Declaration>,
+    pub inner: Option<Block>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -61,12 +61,13 @@ pub enum EntityDeclarationKind {
     CompanionObject,
     Enum,
     ObjectInstance,
+    SecondaryConstructor(ConstructorDeclaration),
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct PrimaryConstructorDeclaration {
     pub modifiers: Vec<Modifier>,
-    pub params: Vec<Param>,
+    pub params: Vec<ConstructorParam>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -429,6 +430,19 @@ pub struct Param {
     pub annotations: Vec<AnnotationSet>,
     pub name: String,
     pub ty: Type,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct ConstructorParam {
+    pub modifiers: Vec<Modifier>,
+    pub property_type: Option<PropertyType>,
+    pub param: Param,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum PropertyType {
+    Var,
+    Val,
 }
 
 #[derive(Debug, PartialEq, Clone)]
