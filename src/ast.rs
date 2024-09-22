@@ -130,7 +130,8 @@ pub enum PropertyAccessor {
     Setter {
         annotations: Vec<AnnotationSet>,
         modifiers: Vec<Modifier>,
-        field: PropertySetterField,
+        field: Option<PropertySetterField>,
+        return_ty: Option<Type>,
         body: Option<Block>,
     },
 }
@@ -139,8 +140,6 @@ pub enum PropertyAccessor {
 pub struct PropertySetterField {
     pub name: String,
     pub ty: Option<Type>,
-    pub return_ty: Option<Type>,
-    pub body: Option<Block>,
 }
 
 #[derive(Debug, PartialEq, Clone)]

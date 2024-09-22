@@ -4,6 +4,7 @@ pub mod entity;
 pub mod enum_entry;
 pub mod function;
 pub mod init;
+pub mod property;
 pub mod typealias;
 
 use crate::ast::*;
@@ -14,6 +15,7 @@ use entity::entity_parser;
 use enum_entry::enum_entry_parser;
 use function::function_parser;
 use init::init_block_parser;
+use property::property_parser;
 use typealias::typealias_parser;
 
 use super::expression::expression_parser;
@@ -39,6 +41,8 @@ pub fn declaration_parser<'a>(
                     .map(DeclarationKind::Constructor),
                 typealias_parser(expr_parser.clone())
                     .map(DeclarationKind::TypeAlias),
+                property_parser(stmt_parser.clone(), expr_parser.clone())
+                    .map(DeclarationKind::Property),
             )))
             .map(|(annotations, kind)| Declaration {
                 annotations: annotations.unwrap_or_default(),
