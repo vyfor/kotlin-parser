@@ -11,12 +11,13 @@ use super::modifier_parser;
 
 pub fn function_parser(
     stmt_parser: impl Parser<char, Statement, Error = Simple<char>> + Clone,
+    expr_parser: impl Parser<char, Expression, Error = Simple<char>> + Clone,
 ) -> impl Parser<char, FunctionDeclaration, Error = Simple<char>> {
     let modifiers = modifier_parser().repeated().or_not();
     let name = text::ident().padded();
-    let type_params = type_params_parser().or_not();
+    let type_params = type_params_parser(expr_parser.clone()).or_not();
     let receiver = type_parser().then_ignore(just('.').padded()).or_not();
-    let params = function_params_parser()
+    let params = function_params_parser(expr_parser.clone())
         .delimited_by(just('(').padded(), just(')').padded())
         .or_not();
     let return_ty = just(':')

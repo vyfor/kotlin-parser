@@ -1,24 +1,26 @@
 use crate::{
     ast::*,
     parse::expression::{
-        call::invocation_args_parser, expression_parser, path::path_parser,
+        call::invocation_args_parser, path::path_parser,
     },
 };
 use chumsky::prelude::*;
 
 pub fn annotations_parser(
+    expr_parser: impl Parser<char, Expression, Error = Simple<char>>,
 ) -> impl Parser<char, AnnotationSet, Error = Simple<char>> {
     just('@')
         .ignore_then(annotation_site_parser().then_ignore(just(':')).or_not())
-        .then(annotation_parser().repeated())
+        .then(annotation_parser(expr_parser).repeated())
         .map(|(site, annotations)| AnnotationSet { site, annotations })
 }
 
 pub fn file_annotations_parser(
+    expr_parser: impl Parser<char, Expression, Error = Simple<char>>,
 ) -> impl Parser<char, AnnotationSet, Error = Simple<char>> {
     just('@')
         .ignore_then(just("file:"))
-        .ignore_then(annotation_parser().repeated())
+        .ignore_then(annotation_parser(expr_parser).repeated())
         .map(|annotations| AnnotationSet {
             site: None,
             annotations,
@@ -39,12 +41,13 @@ pub fn annotation_site_parser(
     ))
 }
 
-pub fn annotation_parser() -> impl Parser<char, Annotation, Error = Simple<char>>
-{
+pub fn annotation_parser(
+    expr_parser: impl Parser<char, Expression, Error = Simple<char>>,
+) -> impl Parser<char, Annotation, Error = Simple<char>> {
     path_parser()
         .then(
             just('(')
-                .ignore_then(invocation_args_parser(expression_parser()))
+                .ignore_then(invocation_args_parser(expr_parser))
                 .then_ignore(just(')'))
                 .or_not(),
         )

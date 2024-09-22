@@ -54,12 +54,17 @@ pub fn anonymous_params_parser(
 }
 
 pub fn function_params_parser(
+    expr_parser: impl Parser<char, Expression, Error = Simple<char>>,
 ) -> impl Parser<char, Vec<Param>, Error = Simple<char>> {
-    param_parser().separated_by(just(',').padded()).collect()
+    param_parser(expr_parser)
+        .separated_by(just(',').padded())
+        .collect()
 }
 
-pub fn param_parser() -> impl Parser<char, Param, Error = Simple<char>> {
-    annotations_parser()
+pub fn param_parser(
+    expr_parser: impl Parser<char, Expression, Error = Simple<char>>,
+) -> impl Parser<char, Param, Error = Simple<char>> {
+    annotations_parser(expr_parser)
         .repeated()
         .or_not()
         .then(

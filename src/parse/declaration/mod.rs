@@ -17,15 +17,16 @@ use super::expression::expression_parser;
 pub fn declaration_parser<'a>(
     stmt_parser: impl Parser<char, Statement, Error = Simple<char>> + Clone + 'a,
 ) -> impl Parser<char, Declaration, Error = Simple<char>> + 'a {
-    let expr_parser = expression_parser().boxed();
+    let expr_parser = expression_parser(stmt_parser.clone()).boxed();
     recursive(|decl| {
-        annotations_parser()
+        annotations_parser(expr_parser.clone())
             .repeated()
             .or_not()
             .then(choice((
-                function_parser(stmt_parser.clone())
+                function_parser(stmt_parser.clone(), expr_parser.clone())
                     .map(DeclarationKind::Function),
-                enum_entry_parser(decl.clone()).map(DeclarationKind::EnumEntry),
+                enum_entry_parser(decl.clone(), expr_parser.clone())
+                    .map(DeclarationKind::EnumEntry),
                 init_block_parser(stmt_parser.clone())
                     .map(DeclarationKind::InitBlock),
                 entity_parser(stmt_parser.clone(), expr_parser.clone())

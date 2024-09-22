@@ -19,10 +19,17 @@ pub fn entity_parser(
     modifier_parser()
         .repeated()
         .or_not()
-        .then(entity_kind_parser(stmt_parser.clone(), expr_parser).padded())
+        .then(
+            entity_kind_parser(stmt_parser.clone(), expr_parser.clone())
+                .padded(),
+        )
         .then(text::ident().padded().or_not())
-        .then(class_type_params_parser().padded().or_not())
-        .then(primary_constructor_parser().or_not())
+        .then(
+            class_type_params_parser(expr_parser.clone())
+                .padded()
+                .or_not(),
+        )
+        .then(primary_constructor_parser(expr_parser).or_not())
         .then(extends_parser().padded().or_not())
         .then(type_bounds_parser().padded().or_not())
         .then(block_parser(stmt_parser).or_not())
@@ -48,7 +55,7 @@ pub fn entity_parser(
                     primary_constructor,
                     bounds: bounds.unwrap_or_default(),
                     extends: extends.unwrap_or_default(),
-                    inner,
+                    body: inner,
                 }
             },
         )
@@ -56,7 +63,7 @@ pub fn entity_parser(
 
 pub fn entity_kind_parser(
     stmt_parser: impl Parser<char, Statement, Error = Simple<char>>,
-    expr_parser: impl Parser<char, Expression, Error = Simple<char>>,
+    expr_parser: impl Parser<char, Expression, Error = Simple<char>> + Clone,
 ) -> impl Parser<char, EntityDeclarationKind, Error = Simple<char>> {
     choice((
         just("enum")
@@ -83,12 +90,13 @@ pub fn extends_parser() -> impl Parser<char, Vec<Type>, Error = Simple<char>> {
 }
 
 pub fn primary_constructor_parser(
+    expr_parser: impl Parser<char, Expression, Error = Simple<char>>,
 ) -> impl Parser<char, PrimaryConstructorDeclaration, Error = Simple<char>> {
     modifier_parser()
         .repeated()
         .or_not()
         .then(
-            constructor_param_parser()
+            constructor_param_parser(expr_parser)
                 .separated_by(just(',').padded())
                 .delimited_by(just('(').padded(), just(')').padded()),
         )
@@ -99,8 +107,9 @@ pub fn primary_constructor_parser(
 }
 
 pub fn constructor_param_parser(
+    expr_parser: impl Parser<char, Expression, Error = Simple<char>>,
 ) -> impl Parser<char, ConstructorParam, Error = Simple<char>> {
-    annotations_parser()
+    annotations_parser(expr_parser)
         .repeated()
         .or_not()
         .then(modifier_parser().repeated().or_not())
@@ -134,14 +143,14 @@ pub fn constructor_param_parser(
 
 pub fn secondary_constructor_parser(
     stmt_parser: impl Parser<char, Statement, Error = Simple<char>>,
-    expr_parser: impl Parser<char, Expression, Error = Simple<char>>,
+    expr_parser: impl Parser<char, Expression, Error = Simple<char>> + Clone,
 ) -> impl Parser<char, ConstructorDeclaration, Error = Simple<char>> {
     modifier_parser()
         .repeated()
         .or_not()
         .then_ignore(just("constructor").padded())
         .then(
-            function_params_parser()
+            function_params_parser(expr_parser.clone())
                 .delimited_by(just('(').padded(), just(')').padded()),
         )
         .then(constructor_delegate_parser(expr_parser).or_not())

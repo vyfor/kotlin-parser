@@ -7,8 +7,8 @@ pub fn statement_parser() -> impl Parser<char, Statement, Error = Simple<char>>
 {
     recursive(|stmt| {
         choice((
-            declaration_parser(stmt).map(Statement::Declaration),
-            expression_parser().map(Statement::Expression),
+            declaration_parser(stmt.clone()).map(Statement::Declaration),
+            expression_parser(stmt).map(Statement::Expression),
         ))
     })
 }

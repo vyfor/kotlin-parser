@@ -16,8 +16,9 @@ pub fn type_parser() -> impl Parser<char, Type, Error = Simple<char>> {
 }
 
 pub fn type_params_parser(
+    expr_parser: impl Parser<char, Expression, Error = Simple<char>>,
 ) -> impl Parser<char, Vec<TypeParam>, Error = Simple<char>> {
-    annotations_parser()
+    annotations_parser(expr_parser)
         .repeated()
         .or_not()
         .then(
@@ -40,8 +41,9 @@ pub fn type_params_parser(
 }
 
 pub fn class_type_params_parser(
+    expr_parser: impl Parser<char, Expression, Error = Simple<char>>,
 ) -> impl Parser<char, Vec<BoundedTypeParam>, Error = Simple<char>> {
-    annotations_parser()
+    annotations_parser(expr_parser)
         .repeated()
         .or_not()
         .then(

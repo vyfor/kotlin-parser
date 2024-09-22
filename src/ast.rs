@@ -50,7 +50,7 @@ pub struct EntityDeclaration {
     pub primary_constructor: Option<PrimaryConstructorDeclaration>,
     pub extends: Vec<Type>,
     pub bounds: Vec<TypeBound>,
-    pub inner: Option<Block>,
+    pub body: Option<Block>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -60,7 +60,6 @@ pub enum EntityDeclarationKind {
     Object,
     CompanionObject,
     Enum,
-    ObjectInstance,
     SecondaryConstructor(ConstructorDeclaration),
 }
 
@@ -158,7 +157,7 @@ pub struct EnumEntryDeclaration {
     pub modifiers: Vec<Modifier>,
     pub name: String,
     pub args: Vec<CallArg>,
-    pub inner: Vec<Declaration>,
+    pub body: Vec<Declaration>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -325,8 +324,8 @@ pub struct WhenEntry {
 #[derive(Debug, PartialEq, Clone)]
 pub struct ObjectExpression {
     pub annotations: Vec<AnnotationSet>,
-    pub extends: Vec<EntityDeclaration>,
-    pub inner: Vec<Declaration>,
+    pub extends: Vec<Type>,
+    pub body: Block,
 }
 
 #[derive(Debug, PartialEq, Clone)]
